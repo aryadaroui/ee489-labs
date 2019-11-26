@@ -22,7 +22,7 @@ void main()
 	Uint8 nugget[2];		// two element arrary of 8 bytes each for easier byte swapping
 	int temp;				// the int converted from string before shrunk to uint16 buffer
 	Uint16 buffer[1];		// the new int value before swapped back to pcm orientation
-	char str[10];			//  the read string from the csv file
+	char str[10];			// the read string from the csv file
 
 	printf("START\n");
 

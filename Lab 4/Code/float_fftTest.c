@@ -46,7 +46,7 @@ int main()
 	if(FFT_FLAG == 1)
 	{
 		// fp = fopen("..\\data\\FFT_spectrum.xls","wt");  // *** for windows
-		fp = fopen("./data/FFT_spectrum.xls","wt");//for mac
+		fp = fopen("./Output/FFT_spectrum.xls","wt");//for mac
 		for(L = 1; L <= EXP; L++)				// Create twiddle factor table
 		{
 			LE = 1 << L;						// LE=2^L=points of sub DFT
@@ -63,12 +63,12 @@ int main()
 		{
 			LE = 1 << L;						// LE=2^L=points of sub DFT
 			LE1 = LE >> 1;						// number of butterflies in sub-DFT 
-			W[L - 1].re = cos(-pi / LE1);
-			W[L - 1].im = sin(-pi / LE1);
+			W[L - 1].re = cos(-pi / LE1);		// Twiddle Phase is negative for IDFT
+			W[L - 1].im = sin(-pi / LE1);		// Twiddle Phase is negative for IDFT
 		}		
 	}
 
-	for(k = 1, j = 0; j <= (13 * N); j++)		// data file has 1664 = 13*128 data 
+	for(k = 1, j = 0; j < (13 * N); j++)		// data file has 1664 = 13*128 data 
 	{
 		for(i = 0; i < N - 1; i++) 
 		{
@@ -80,7 +80,7 @@ int main()
 		fft(X, EXP, W, FFT_FLAG, HALF_SCALE_FLAG, RECIP_SCALE_FLAG); // perform FFT with scale 
 		bit_rev(X, EXP);
 
-		for(i = 0; i < N / 2; i++)			  // verify FFT result 
+		for(i = 0; i < N; i++)			  // verify FFT result 
 		{
 			temp.re = X[i].re * X[i].re;
 			temp.im = X[i].im * X[i].im;        

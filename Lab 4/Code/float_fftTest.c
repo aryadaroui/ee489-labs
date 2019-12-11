@@ -12,6 +12,9 @@
 *                Publisher: John Wiley and Sons, Ltd
 */
 
+
+// I changed the fopen call to be in the if statement based on FFT flag. Still need to open spectrum data and use this as input instead of signal. Should be done then. Also I did twiddle factor fix.
+
 #include <stdio.h>
 #include "tistdtypes.h"
 #include <math.h>   
@@ -35,17 +38,34 @@ int main()
 	FILE* fp; // file pointer
 	// float scale;
 
-	// fp = fopen("..\\data\\FFT_spectrum.xls","wt");  // *** for windows
-	fp = fopen("./data/FFT_spectrum.xls","wt");//for mac
+
 	// fprintf(fp, "Bin (at each 128-FFT frame)\tFFT spectrum\n"); //for debug
 	n = 0;
 	printf("Exp --- started\n");
-	for(L = 1; L <= EXP; L++)				// Create twiddle factor table
+	
+	if(FFT_FLAG == 1)
 	{
-		LE = 1 << L;						// LE=2^L=points of sub DFT
-		LE1 = LE >> 1;						// number of butterflies in sub-DFT 
-		W[L - 1].re = cos(pi / LE1);
-		W[L - 1].im = sin(pi / LE1);
+		// fp = fopen("..\\data\\FFT_spectrum.xls","wt");  // *** for windows
+		fp = fopen("./data/FFT_spectrum.xls","wt");//for mac
+		for(L = 1; L <= EXP; L++)				// Create twiddle factor table
+		{
+			LE = 1 << L;						// LE=2^L=points of sub DFT
+			LE1 = LE >> 1;						// number of butterflies in sub-DFT 
+			W[L - 1].re = cos(pi / LE1);
+			W[L - 1].im = sin(pi / LE1);
+		}
+	}
+	else
+	{
+		// fp = fopen("..\\data\\IFFT_signal.xls","wt");  // *** for windows
+		fp = fopen("./data/IFFT_signal.xls","wt");//for mac
+		for(L = 1; L <= EXP; L++)				// Create twiddle factor table
+		{
+			LE = 1 << L;						// LE=2^L=points of sub DFT
+			LE1 = LE >> 1;						// number of butterflies in sub-DFT 
+			W[L - 1].re = cos(-pi / LE1);
+			W[L - 1].im = sin(-pi / LE1);
+		}		
 	}
 
 	for(k = 1, j = 0; j <= (13 * N); j++)		// data file has 1664 = 13*128 data 

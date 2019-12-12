@@ -14,9 +14,12 @@
 
 #include "fft_float.c" // *** Arya did this
 #include "fbit_rev.c"  // *** Arya did this
+#include "ifft.c" 	   // *** Arya did this
 
-extern void fft(complex *, Uint16, complex *, Uint16, Uint16, Uint16);
-extern void bit_rev(complex *, Int16);
+
+extern void fft( complex *, uint16, uint16, uint16);
+extern void ifft(complex *, uint16, uint16, uint16);
+extern void bit_rev(complex *, int16);
 
 #define N 128           /* Number of FFT points */
 #define EXP 7           /* EXP=log2(N) */

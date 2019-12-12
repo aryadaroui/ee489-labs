@@ -22,20 +22,28 @@
 #include "float_fft.h"
 #include "input_f.dat"	// Test data file 
 					  
-complex X[N];		// Declare input array  
-complex W[EXP];		// Twiddle e^(-j2pi/N) table 
-complex W1[EXP];	// Twiddle e^(-j2pi/N) table 
-complex temp;
-Int16   spectrum[N/2];
 
-#define FFT_FLAG        	1	// FFT when 1 and IFFT when 0
-#define HALF_SCALE_FLAG		1	// scales by 0.5 at butterfly computation
-#define RECIP_SCALE_FLAG	0	// scale input samples by 1/N at beginning of FFT
+
+// #define HALF_SCALE_FLAG		1	// scales by 0.5 at butterfly computation
+// #define RECIP_SCALE_FLAG	0	// scale input samples by 1/N at beginning of FFT
+// #define ONE_SIDED			1	// output one-sided spectrum instead of 2 sided
 
 int main()
-{
-	Uint16 i, j, L, LE, LE1, k, n; // generic index varabiels. L, LE, and LE1 relate to the bitdepth
-	FILE* fp; // file pointer
+{	
+	complex X[N];		// Declare input array  
+	complex W[EXP];		// Twiddle e^(-j2pi/N) table 
+	complex temp;
+	int16   spectrum[N];
+	int16   signal[N];
+	bool HALF_SCALE_FLAG	= TRUE;	// scales by 0.5 at butterfly computation
+	bool RECIP_SCALE_FLAG	= FALSE;	// scale input samples by 1/N at beginning of FFT
+	bool ONE_SIDED			= TRUE;	// output one-sided spectrum instead of 2 sided
+	uint16 i, j, L, LE, LE1, k, n; // generic index varabiels. L, LE, and LE1 relate to the bitdepth
+	FILE* fpFFT;  // file pointer
+	FILE* fpIFFT; // file pointer
+	uint16 side;
+
+	
 	// float scale;
 
 
@@ -43,31 +51,12 @@ int main()
 	n = 0;
 	printf("Exp --- started\n");
 	
-	if(FFT_FLAG == 1)
-	{
-		// fp = fopen("..\\data\\FFT_spectrum.xls","wt");  // *** for windows
-		fp = fopen("./Output/FFT_spectrum.xls","wt");//for mac
-		for(L = 1; L <= EXP; L++)				// Create twiddle factor table
-		{
-			LE = 1 << L;						// LE=2^L=points of sub DFT
-			LE1 = LE >> 1;						// number of butterflies in sub-DFT 
-			W[L - 1].re = cos(pi / LE1);
-			W[L - 1].im = sin(pi / LE1);
-		}
-	}
-	else
-	{
-		// fp = fopen("..\\data\\IFFT_signal.xls","wt");  // *** for windows
-		fp = fopen("./data/IFFT_signal.xls","wt");//for mac
-		for(L = 1; L <= EXP; L++)				// Create twiddle factor table
-		{
-			LE = 1 << L;						// LE=2^L=points of sub DFT
-			LE1 = LE >> 1;						// number of butterflies in sub-DFT 
-			W[L - 1].re = cos(-pi / LE1);		// Twiddle Phase is negative for IDFT
-			W[L - 1].im = sin(-pi / LE1);		// Twiddle Phase is negative for IDFT
-		}		
-	}
+		// fpFFT  = fopen("..\\Output\\FFT_spectrum.xls","wt"); // *** for windows
+		// fpIFFT = fopen("..\\Output\\IFFT_signal.xls","wt");  // *** for windows
+		fpFFT  = fopen("./Output/FFT_spectrum.xls","wt");	//for mac
+		fpIFFT = fopen("./Output/IFFT_signal.xls","wt");	//for mac
 
+	// PROCESS and WRITE FFT 
 	for(k = 1, j = 0; j < (13 * N); j++)		// data file has 1664 = 13*128 data 
 	{
 		for(i = 0; i < N - 1; i++) 
@@ -76,21 +65,45 @@ int main()
 			X[i].im = 0.0;        
 		} 	
 
-		// Start FFT 
-		fft(X, EXP, W, FFT_FLAG, HALF_SCALE_FLAG, RECIP_SCALE_FLAG); // perform FFT with scale 
+		// PROCESS FFT 
+		fft(X, EXP, HALF_SCALE_FLAG, RECIP_SCALE_FLAG); // perform FFT with scale 
 		bit_rev(X, EXP);
 
-		for(i = 0; i < N; i++)			  // verify FFT result 
+		// WRITE FFT spectrum to file
+		for(i = 0; i < N / 2; i++)			  // verify FFT result. was N/2 to only get one-sided spectrum
 		{
 			temp.re = X[i].re * X[i].re;
 			temp.im = X[i].im * X[i].im;        
-			spectrum[i] = (Int16)((temp.re + temp.im) * 32767); // this is not actual magnitude; This is magnitude squared
-			fprintf(fp, "%d\t%d\n", n++, spectrum[i]);
+			spectrum[i] = (int16)((temp.re + temp.im) * 32767); // this is not actual magnitude; This is magnitude squared
+			fprintf(fpFFT, "%d\t%d\n", n++, spectrum[i]);
 		}
-		// printf("------ WINDOW %i COMPLETE\n", j/13); // for debug
 	}
 
-	fclose(fp);
+	n = 0;
+	// PROCESS and WRITE IFFT 
+	for(k = 1, j = 0; j < 13; j++)		// data file has 1664 = 13*128 data 
+	{
+		HALF_SCALE_FLAG = FALSE;
+		RECIP_SCALE_FLAG = TRUE;
+
+		// PROCESS IFFT 
+		bit_rev(X, EXP);
+		ifft(X, EXP, HALF_SCALE_FLAG, RECIP_SCALE_FLAG); // perform FFT with scale 
+
+		// WRITE IFFT signal to file
+		for(i = 0; i < N / 2; i++)			  // verify FFT result. was N/2 to only get one-sided spectrum
+		{
+			temp.re = X[i].re * X[i].re;
+			temp.im = X[i].im * X[i].im;        
+			signal[i] = (int16)((temp.re + temp.im) * 32767); // this is not actual magnitude; This is magnitude squared
+			fprintf(fpIFFT, "%d\t%d\n", n++, signal[i]);
+		}
+		// fclose(fpIFFT);
+
+	}
+
+	fclose(fpFFT);
+	fclose(fpIFFT);
 	printf("Exp --- completed\n");
 	return 0;
 }

@@ -36,26 +36,27 @@
 
 #ifndef TRUE
 
-typedef int		Bool;
-#define TRUE		((Bool) 1)
-#define FALSE		((Bool) 0)
+typedef int		bool;
+#define TRUE		((bool) 1)
+#define FALSE		((bool) 0)
 
 #endif
 
-typedef int             Int;
-typedef unsigned int    Uns;    /* deprecated type */
-typedef char            Char;
-typedef char *          String;
-typedef void *          Ptr;
+// typedef int             int;
+typedef unsigned int    uint;
+// typedef char            Char;
+// typedef char *          String;
+// typedef void *          Ptr;
+// typedef unsigned short	bool;
 
-typedef unsigned long	Uint32;
-typedef unsigned short	Uint16;
-typedef unsigned char	Uint8;
+typedef unsigned long	uint32;
+typedef unsigned short	uint16;
+typedef unsigned char	uint8;
 
  /* Signed integer definitions (32bit, 16bit, 8bit) follow... */
-typedef long		Int32;
-typedef short		Int16;
-typedef char		Int8;
+typedef long		int32;
+typedef short		int16;
+typedef char		int8;
 
 #endif /* _TI_STD_TYPES */
 

@@ -17,11 +17,11 @@
 #include "tistdtypes.h"
 // #include "fcomplex.h"	// *** Floating-point complex.h header file 
 
-void bit_rev(complex* X, Int16 EXP)
+void bit_rev(complex* X, int16 EXP)
 {
-    Uint16 i, j, k;
-    Uint16 N = 1 << EXP;	// Number of points for FFT 
-    Uint16 N2 = N >> 1;
+    uint16 i, j, k;
+    uint16 N = 1 << EXP;	// Number of points for FFT 
+    uint16 N2 = N >> 1;
     complex temp;		// Temporary storage of the complex variable 
 	
     for(j = 0, i = 1; i < N - 1; i++)

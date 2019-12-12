@@ -14,10 +14,20 @@
  * 
  */
 
+
+
 #include "tistdtypes.h"
 // #include "fcomplex.h"       // Floating-point complex.h header file 
 
 #define pi 3.1415926535897  
+
+// struct cmpx
+// {
+//     double re;
+//     double im;
+// };
+// typedef struct cmpx complex;
+
 
 void ifft(complex*, uint16, uint16, uint16);
 
@@ -43,8 +53,13 @@ void ifft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 	{
 		stageSize = 1 << level;						// stageSize=2^level=points of sub DFT
 		reach = stageSize >> 1;						// number of butterflies in sub-DFT 
-		W[level - 1].re = cos(-pi / reach);			// Negative phase for IDFT using FFT
-		W[level - 1].im = sin(-pi / reach);			// Negative phase for IDFT using FFT
+		W[level - 1].re = cos(pi / reach);			// We chose to use the complex conjugate method instead of negative twiddle factor
+		W[level - 1].im = sin(pi / reach);			
+	}
+
+	for (i = 0;	 i<N; i++)
+	{
+		X[i].im = -X[i].im;
 	}
 
 	// Calculate Scaling Factor
@@ -57,6 +72,7 @@ void ifft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 		hScale = 1.0; 
 	}
 
+
 	if(rFlag == 1)
 	{
 		rScale = 1.0/N;
@@ -66,39 +82,6 @@ void ifft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 		rScale = 1.0; 
 	}           
 	
-   	/* ORIGINAL, GIVEN FFT, DIT
-		for (level=1; level<=bits; level++) 	// FFT of length 2^bits 
-		{
-			stageSize=1<<level;        	// stageSize=2^level=points of sub DFT : Will be 2, 4, 8, 16, 32, 64, 128 
-			reach=stageSize>>1;      	// Number of butterflies in sub-DFT 
-			U.re = 1.0;
-			U.im = 0.0;
-	
-			for (j=0; j<reach;j++)
-			{
-				for(a=j; a<N; a+=stageSize) // Butterfly computations 
-				{
-					b=a+reach;
-					temp1.re = (X[b].re*U.re - X[b].im*U.im)*scale;
-					temp1.im = (X[b].im*U.re + X[b].re*U.im)*scale;
-	
-					X[b].re = X[a].re*scale - temp1.re;
-					X[b].im = X[a].im*scale - temp1.im;
-	
-					X[a].re = X[a].re*scale + temp1.re;
-					X[a].im = X[a].im*scale + temp1.im;
-	
-					printf("%d -> %d\n", a,b);
-				}
-				
-				// Recursive compute W^k as U*W^(k-1) 
-				temp1.re = U.re*W[level-1].re - U.im*W[level-1].im;
-				U.im = U.re*W[level-1].im + U.im*W[level-1].re;
-				U.re = temp1.re;
-			}
-		}
-	*/
-
 	// OUR FFT, DIF :-)
 	for(level = bits; level < 8; level--) 	// FFT of length 2^bits 
 	{

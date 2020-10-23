@@ -18,16 +18,10 @@
 
 #include "tistdtypes.h"
 // #include "fcomplex.h"       // Floating-point complex.h header file 
+#include <math.h>   
+
 
 #define pi 3.1415926535897  
-
-// struct cmpx
-// {
-//     double re;
-//     double im;
-// };
-// typedef struct cmpx complex;
-
 
 void ifft(complex*, uint16, uint16, uint16);
 
@@ -35,8 +29,8 @@ void ifft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 {
 	complex  temp1;	// Temporary storage of complex variable 
 	complex	 temp2;	// Temporary storage of complex variable 
-	complex watch1, watch2, watch3; // for debug
-	complex W[EXP];		// Twiddle e^(-j2pi/N) table 
+	// complex watch1, watch2, watch3; // for debug
+	complex W[7];		// Twiddle e^(-j2pi/N) table 
 	complex  U;     // Twiddle factor W^k 
 	uint16 a, j, i;	// a is index for higher point in butterfly. j and i are generic loop indices
 	uint16 b;		// Index for lower point in butterfly 
@@ -45,10 +39,10 @@ void ifft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 	uint16 reach;		// Number of butterflies in one DFT a stage level.  Also is offset to lower point in butterfly at stage level 
 	uint16 bits = EXP;	// reassigned to a less confusing name
 	float hScale, rScale;		// scale to be applied
-	uint16 N = 1 << bits;// Number of points for FFT 
-	uint16 stage = 0;	// stage is where the butterfly computations actaully criss cross. It is different from the level
+	uint16 N = 1 << bits;		// Number of points for FFT 
+	uint16 stage = 0;			// stage is where the butterfly computations actaully criss cross. It is different from the level
 
-	// Calculate Twiddle Factor
+	// CALC Twiddle Factor
 	for(level = 1; level <= EXP; level++)				
 	{
 		stageSize = 1 << level;						// stageSize=2^level=points of sub DFT
@@ -57,12 +51,13 @@ void ifft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 		W[level - 1].im = sin(pi / reach);			
 	}
 
+	// PROC the conjugate
 	for (i = 0;	 i<N; i++)
 	{
 		X[i].im = -X[i].im;
 	}
 
-	// Calculate Scaling Factor
+	// SET Scaling Factor
 	if(hFlag == 1)
 	{
 		hScale = 0.5;
@@ -109,24 +104,14 @@ void ifft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 				X[a].re = temp1.re * hScale;
 				X[a].im = temp1.im * hScale;
 
-				X[b].re = (temp2.re * U.re - temp2.im * U.im) * hScale; // test?
+				X[b].re = (temp2.re * U.re - temp2.im * U.im) * hScale;
 				X[b].im = (temp2.im * U.re + temp2.re * U.im) * hScale;
-
-				// watch2.re = X[b].re;							// for debug
-				// watch2.im = X[b].im;							// for debug
-				// watch3 = (int16)((temp1.re+temp1.im)*32767);	// for debug
-
-				// printf("%d -> %d\n", a,b);
-				// printf("reach: #%d\n", reach);
-				// printf("b: #%d\n", b);
 			}
 			
 			// Recursive compute W^k as U*W^(k-1) 
 			temp1.re = U.re * W[level - 1].re - U.im * W[level - 1].im;
 			U.im	 = U.re * W[level - 1].im + U.im * W[level - 1].re;
 			U.re	 = temp1.re;
-			// printf("-- stage complete ---\n");	// for debug
 		}
-		// printf("\n--- level complete ---\n");	// for debug
 	}
 }

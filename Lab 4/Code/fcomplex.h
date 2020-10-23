@@ -14,8 +14,8 @@
 
 struct cmpx
 {
-    double re;
-    double im;
+    float re;
+    float im;
 };
 typedef struct cmpx complex;
 

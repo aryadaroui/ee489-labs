@@ -8,7 +8,7 @@
 *
 *  For the book "Real Time Digital Signal Processing:
 *                Fundamentals, Implementation and Application, 3rd Ed"
-*                By Sen M. Kuo, Bob H. Lee, and Wenshun Tian
+*                By Sen M. Kuo, Bob H. Lee, and Wenshun
 *                Publisher: John Wiley and Sons, Ltd
 */
 
@@ -32,9 +32,9 @@ int main()
 {	
 	complex X[N];		// Declare input array  
 	complex W[EXP];		// Twiddle e^(-j2pi/N) table 
-	complex temp;
-	int16   spectrum[N];
-	complex	allSpectra[N*13];
+	complex temp;		// generic temporary variable to hold temporary values
+	int16   spectrum[N];// array of the samples of a (max) 128 sample spectrum
+	complex	allSpectra[N*13];//array of sample of input file, full size
 	double   signal[N];
 	bool isHalfScale;		// scales by 0.5 at butterfly computation
 	bool isRecipScale;	// scale input samples by 1/N at beginning of FFT
@@ -50,8 +50,8 @@ int main()
 	
 	// fpFFT  = fopen("..\\Output\\FFT_spectrum.xls","wt"); // *** for windows
 	// fpIFFT = fopen("..\\Output\\IFFT_signal.xls","wt");  // *** for windows
-	fpFFT  = fopen("./Output/FFT_spectrum.xls","wt");	//for mac
-	fpIFFT = fopen("./Output/IFFT_signal.xls","wt");	//for mac
+	fpFFT  = fopen("./Output/FFT_spectrum.xls","wt");	// for mac
+	fpIFFT = fopen("./Output/IFFT_signal.xls","wt");	// for mac
 
 	isHalfScale = TRUE;
 	isRecipScale = FALSE;
@@ -117,10 +117,6 @@ int main()
 		// WRITE IFFT signal to file
 		for(i = 0; i < N; i++)			  // verify FFT result.
 		{
-			// temp.re = X[i].re * X[i].re;
-			// temp.im = X[i].im * X[i].im;        
-			// signal[i] = (float)((temp.re + temp.im)); // this is not actual magnitude; This is magnitude squared
-			// fprintf(fpIFFT, "%d\t%f\n", n++, signal[i]);
 			fprintf(fpIFFT,"%d\t%f\n", n++, X[i].re);
 		}
 	}

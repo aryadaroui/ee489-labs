@@ -15,6 +15,8 @@
 
 #include "tistdtypes.h"
 #include "fcomplex.h"       // Floating-point complex.h header file 
+#include <math.h>   
+
 
 #define pi 3.1415926535897  
 
@@ -24,7 +26,7 @@ void fft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 {
 	complex  temp1;	// Temporary storage of complex variable 
 	complex	 temp2;	// Temporary storage of complex variable 
-	complex W[EXP];		// Twiddle e^(-j2pi/N) table 
+	complex W[7];		// Twiddle e^(-j2pi/N) table 
 	complex watch1, watch2, watch3; // for debug
 	complex  U;     // Twiddle factor W^k 
 	uint16 a, j, i;	// a is index for higher point in butterfly. j and i are generic loop indices
@@ -56,14 +58,14 @@ void fft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 		hScale = 1.0; 
 	}
 
-	if(rFlag == 1)
-	{
-		rScale = 1.0/N;
-	}
-	else   
-	{
-		rScale = 1.0; 
-	}           
+	// if(rFlag == 1)
+	// {
+	// 	rScale = 1.0/N;
+	// }
+	// else   
+	// {
+	// 	rScale = 1.0; 
+	// }           
 	
 	// OUR FFT, DIF :-)
 	for(level = bits; level < 8; level--) 	// FFT of length 2^bits 
@@ -112,6 +114,16 @@ void fft(complex* X, uint16 EXP, uint16 hFlag, uint16 rFlag)
 		}
 		// printf("\n--- level complete ---\n");	// for debug
 	}
+
+	if(rFlag == 1)
+	{
+		rScale = 1.0/N;
+		for (i = 0;	 i<N; i++)
+		{
+			X[i].re = X[i].re * rScale;
+			X[i].im = X[i].im * rScale;
+		}
+	}    
 }
 
   	/* ORIGINAL, GIVEN FFT, DIT
